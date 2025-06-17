@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Znajdź najlepsze wydarzenia w Twoim mieście">
+    <title>dzieje.się - odkrywaj wydarzenia w Twojej okolicy</title>
+    <link rel="icon" href="/favicon.ico" th:href="@{/favicon.ico}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-hover: #1b5e20;
+            --primary-light: #81c784;
+            --primary-contrast: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --background: #f8f9fa;
+            --surface: #ffffff;
+            --error: #dc3545;
+            --success: #28a745;
+            --info: #0066cc;
+            --font-size-base: 1rem;
+            --navbar-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            --hero-bg: var(--background);
+            --hero-text: var(--text-primary);
+            --start: #264f28;
+        }
+    
+        [data-bs-theme="dark"] {
+            --primary-color: #0f0f0f;
+            --primary-hover: rgb(23, 37, 23);
+            --primary-light: #7b9a7d;
+            --primary-contrast: #d6d6d6;
+            --text-primary: #f2faf2;
+            --text-secondary: #dff0e3;
+            --background: #2f302f;
+            --surface: #1e1e1e;
+            --error: #ff6b6b;
+            --success: #51cf66;
+            --info: #3c7c34;
+            --navbar-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --hero-bg: var(--background);
+            --hero-text: var(--text-primary);
+            --start: #ebfceb;
+        }
+        
+        body {
+            font-size: var(--font-size-base);
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 0.8rem 0 !important;
+            box-shadow: var(--navbar-shadow);
+        }
+    
+        .input-group {
+            border-radius: 0.375rem !important;
+            overflow: hidden;
+        }
+    
+        .input-group > * {
+            border-radius: 0 !important;
+        }
+    
+        .input-group > :first-child {
+            border-top-left-radius: 0.375rem !important;
+            border-bottom-left-radius: 0.375rem !important;
+        }
+    
+        .input-group > :last-child {
+            border-top-right-radius: 0.375rem !important;
+            border-bottom-right-radius: 0.375rem !important;
+        }
+    
+        .navbar .dropdown-toggle {
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 1rem !important;
+            display: flex;
+            align-items: center;
+        }
+    
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+    
+        .leckerli-font {
+            font-family: 'Leckerli One', cursive;
+            color: #ffffff; 
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--primary-contrast);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .btn-primary:hover, 
+        .btn-primary:focus {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: var(--primary-contrast);
+        }
+    
+        .btn-primary:active {
+            background-color: var(--primary-hover) !important;
+            border-color: var(--primary-hover) !important;
+            color: var(--primary-contrast) !important;
+            transform: translateY(1px);
+        }
+    
+        .btn-primary:focus {
+            box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.5) !important;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-primary:hover, 
+        .btn-outline-primary:focus {
+            background-color: transparent;
+            color: var(--primary-color);
+            border-color: var(--primary-hover);
+            box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.25);
+        }
+    
+        .btn-outline-primary:active {
+            background-color: rgba(46, 125, 50, 0.1) !important;
+            color: var(--primary-hover) !important;
+            border-color: var(--primary-hover) !important;
+        }
+        
+        .badge.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .badge.bg-success {
+            background-color: var(--success) !important;
+        }
+        
+        .badge.bg-info {
+            background-color: var(--info) !important;
+            color: white !important;
+        }
+        
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        .card {
+            background-color: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .card:hover, .card:focus-within {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+        
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        
+        .card-footer {
+            background-color: var(--surface);
+            border-top: 1px solid rgba(0, 0, 0, 0.125);
+            padding: 1rem;
+            margin-top: auto;
+        }
+        
+        footer {
+            background-color: var(--primary-color) !important;
+            color: var(--primary-contrast) !important;
+            padding: 2rem 0;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+            outline: 3px solid var(--primary-contrast) !important;
+        }
+        
+        a:focus, 
+        button:focus, 
+        input:focus, 
+        select:focus,
+        textarea:focus,
+        [tabindex]:focus,
+        [role="button"]:focus,
+        [role="link"]:focus,
+        [role="menuitem"]:focus,
+        [role="radio"]:focus,
+        [role="checkbox"]:focus {
+            outline: 3px solid var(--primary-light) !important;
+            outline-offset: 3px !important;
+            box-shadow: 0 0 0 3px rgba(129, 199, 132, 0.5) !important;
+            transition: outline 0.2s ease, box-shadow 0.2s ease;
+        }
+    
+        .btn:focus {
+            outline: 3px solid var(--primary-light) !important;
+            outline-offset: 2px !important;
+            box-shadow: 0 0 0 3px rgba(129, 199, 132, 0.5) !important;
+        }
+    
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25) !important;
+        }
+    
+        .card:focus-within {
+            box-shadow: 0 0 0 3px var(--primary-light) !important;
+            transform: translateY(-3px);
+        }
+    
+        .dropdown-item:focus {
+            background-color: var(--primary-light) !important;
+            color: var(--primary-contrast) !important;
+            outline: none !important;
+        }
+    
+        .dropdown-item-focused {
+            background-color: var(--primary-light) !important;
+            color: var(--primary-contrast) !important;
+        }
+    
+        .dropdown-toggle:focus {
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.3) !important;
+        }
+    
+        .page-link:focus {
+            z-index: 3;
+            color: var(--primary-hover) !important;
+            background-color: var(--primary-light) !important;
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25) !important;
+        }
+    
+        .accessibility-btn-nav:focus {
+            outline: 3px solid var(--primary-contrast) !important;
+            outline-offset: 2px !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+    
+        .card[tabindex="0"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--primary-light) !important;
+        }
+    
+        footer a:focus {
+            outline: 3px solid var(--primary-contrast) !important;
+            outline-offset: 2px !important;
+            text-decoration: none !important;
+        }
+    
+        .navbar-dark .navbar-nav .nav-link {
+            color: var(--primary-contrast) !important;
+            padding: 0.5rem 1rem;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link:hover {
+            text-decoration: underline;
+            color: var(--primary-contrast) !important;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+    
+        .navbar-dark .navbar-nav .nav-link:focus {
+            outline: 3px solid var(--primary-contrast) !important;
+            outline-offset: -3px !important;
+            text-decoration: none !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: var(--primary-contrast) !important;
+        }
+    
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px var(--primary-contrast) !important;
+        }
+    
+        [data-bs-theme="dark"] {
+            --focus-color: rgba(129, 199, 132, 0.7);
+        }
+    
+        [data-bs-theme="dark"] a:focus, 
+        [data-bs-theme="dark"] button:focus, 
+        [data-bs-theme="dark"] input:focus, 
+        [data-bs-theme="dark"] select:focus {
+            outline-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 3px var(--focus-color) !important;
+        }
+    
+        .btn-check:focus + .btn, .btn:focus {
+            box-shadow: 0 0 0 3px rgba(129, 199, 132, 0.5) !important;
+        }
+    
+        .btn-outline-primary:focus {
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.5) !important;
+        }
+    
+        #searchInput:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.25);
+        }
+    
+        #citySelect:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.25);
+        }
+    
+        .event-city-badge {
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            color: white !important;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+    
+        .event-start {
+            color: var(--start);
+        }
+    
+        .accessibility-nav {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        
+        .accessibility-btn-nav {
+            background-color: transparent;
+            border: 1px solid var(--primary-light);
+            color: var(--primary-contrast);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .accessibility-btn-nav:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.zoomed {
+            --font-size-base: 1.5rem;
+            font-size: var(--font-size-base);
+        }
+        
+        body.zoomed .btn, 
+        body.zoomed .form-control, 
+        body.zoomed .card, 
+        body.zoomed .navbar-brand {
+            font-size: var(--font-size-base);
+        }
+        
+        body.zoomed .card-img-top {
+            height: 300px;
+        }
+    
+        .featured-events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+    
+        .hero-section {
+            background-color: var(--hero-bg);
+            color: var(--hero-text);
+            padding: 3rem 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+    
+        body.zoomed .hero-section h1 {
+            font-size: 4.5rem;
+        }
+    
+        body.zoomed .hero-section p {
+            font-size: 1.5rem; 
+        }
+    
+        section.py-5 {
+            padding-top: 0.5rem !important;
+        }
+    
+        @media (max-width: 992px) {
+            .navbar-collapse {
+                padding-top: 1rem;
+            }
+            
+            .accessibility-nav {
+                margin-left: 0;
+                margin-top: 1rem;
+                justify-content: flex-start;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+            
+            .input-group {
+                flex-wrap: nowrap;
+            }
+            
+            #searchInput {
+                width: 100px;
+            }
+            
+            .card-img-top {
+                height: 180px;
+            }
+            
+            body.zoomed .card-img-top {
+                height: 270px;
+            }
+    
+            .featured-events-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                height: auto !important;
+            }
+            
+            .input-group > * {
+                border-radius: 0.375rem !important;
+                margin-bottom: 0.5rem;
+            }
+            
+            #searchInput, #citySelect {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Przejdź do głównej zawartości</a>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" aria-label="Główne menu">
+
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/" tabindex="0">
+                <i class="bi bi-calendar-event me-2" aria-hidden="true"></i>dzieje.się
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-expanded="false" aria-label="Rozwiń menu" tabindex="0">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex flex-grow-1 mx-lg-4 my-2 my-lg-0">
+                    <div class="input-group w-100">
+                        <label for="citySelect" class="visually-hidden">Wybierz miasto</label>
+                        <select class="form-select" id="citySelect">
+                            <option value="" disabled selected>Wybierz miasto...</option>
+                            <option value="">Wszystkie miasta</option>
+                            <option th:each="city : ${cities}" th:value="${city}" th:text="${city}"></option>
+                        </select>
+                
+                        <label for="searchInput" class="visually-hidden">Szukaj wydarzeń</label>
+                        <input type="search" id="searchInput" class="form-control" placeholder="Szukaj wydarzeń...">
+                        <button class="btn btn-light" type="button" aria-label="Wyszukaj" tabindex="0">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>                                
+                <ul class="navbar-nav ms-lg-auto">
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="nav-link" href="/login" aria-label="Zaloguj się" tabindex="0">
+                            <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Zaloguj się
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="nav-link" href="/register" aria-label="Zarejestruj się" tabindex="0">
+                            <i class="bi bi-person-plus me-1" aria-hidden="true"></i> Zarejestruj się
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"
+                           aria-label="Menu użytkownika" tabindex="0">
+                            <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
+                            <span th:text="${#authentication.name}"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" role="menu">
+                            <li role="none">
+                                <a class="dropdown-item" href="/profile/edit" role="menuitem" tabindex="-1">
+                                    <i class="bi bi-pencil-square me-2" aria-hidden="true"></i>Edytuj profil
+                                </a>
+                            </li>
+                            <li role="none" sec:authorize="hasRole('ORGANIZER')">
+                                <a class="dropdown-item" href="/events/create_event" role="menuitem" tabindex="-1">
+                                    <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>Dodaj wydarzenie
+                                </a>
+                            </li>
+                            <li role="none" sec:authorize="hasRole('ORGANIZER')">
+                                <a class="dropdown-item" href="/dashboard/organizer" role="menuitem" tabindex="-1">
+                                    <i class="bi bi-speedometer2 me-2" aria-hidden="true"></i>Panel organizatora
+                                </a>
+                            </li>
+                            <li role="none" sec:authorize="hasRole('ADMIN')">
+                                <a class="dropdown-item" href="/admin/dashboard" role="menuitem" tabindex="-1">
+                                    <i class="bi bi-speedometer2 me-2" aria-hidden="true"></i>Panel administratora
+                                </a>
+                            </li>
+                            <li role="none" sec:authorize="hasRole('PARTICIPANT')">
+                                <a class="dropdown-item" href="/dashboard/participant" role="menuitem" tabindex="-1">
+                                    <i class="bi bi-ticket-perforated me-2" aria-hidden="true"></i>Moje wydarzenia
+                                </a>
+                            </li>
+                            <li role="none"><hr class="dropdown-divider"></li>
+                            <li role="none">
+                                <form th:action="@{/logout}" method="post" class="d-inline">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start" role="menuitem" tabindex="-1">
+                                        <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Wyloguj się
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="accessibility-nav">
+                    <button class="accessibility-btn-nav" id="zoomToggleNav" aria-label="Powiększ tekst (50%)" tabindex="0">
+                        <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                    </button>
+                    <button class="accessibility-btn-nav" id="themeToggleNav" aria-label="Zmień motyw" tabindex="0">
+                        <i class="bi bi-moon-fill" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Główna zawartość -->
+    <main class="container-fluid" id="main-content" tabindex="-1">
+        <!-- Hero  -->
+        <section class="hero-section" aria-labelledby="main-heading">
+            <div class="container text-center">
+                <h1 id="main-heading" class="display-5 fw-bold mb-4">Odkrywaj najlepsze wydarzenia w Twojej okolicy</h1>
+                <p class="lead mb-4">Znajdź koncerty, wystawy, warsztaty i wiele innych atrakcji w Twoim mieście</p>
+            </div>
+        </section>
+
+        <!-- Polecane wydarzenia -->
+        <section class="py-5" aria-labelledby="featured-events-heading">
+            <div class="container">
+                <h2 id="featured-events-heading" class="mb-4 text-center">
+                    <span id="featured-events-title">Polecane wydarzenia</span>
+                    <span id="city-name" class="text-primary" style="display: none;"> w <span></span></span>
+                </h2>
+                
+                <div class="featured-events-grid">
+                    <div class="card h-100 shadow-sm" th:each="event : ${featuredEvents}"
+                         th:attr="data-search=|${event.title} ${event.description} ${event.city}|"
+                         th:data-city="${event.city}"
+                         tabindex="0">
+                        <div class="position-relative">
+                            <img th:src="@{/uploads/images/{img}(img=${event.imageUrl})}" 
+                                 class="card-img-top" 
+                                 th:alt="${'Zdjęcie wydarzenia: ' + event.title}"
+                                 tabindex="-1">
+                            <span class="event-city-badge position-absolute top-0 end-0 m-2 badge">
+                                <i class="bi bi-geo-alt" aria-hidden="true"></i> <span th:text="${event.city}"></span>
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="h5 card-title" th:text="${event.title}"></h3>
+                            <p class="card-text" th:text="${#strings.abbreviate(event.description, 70)}"></p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-info mb-2" th:text="${event.category}"></span>
+                                    <small class="event-start fw-bold d-block" 
+                                           th:text="${'Start: ' + #temporals.format(event.startDate, 'dd.MM.yyyy HH:mm')}"></small>
+                                    <small class="text-muted" 
+                                           th:text="${'Koniec: ' + #temporals.format(event.endDate, 'dd.MM.yyyy HH:mm')}"></small>
+                                </div>
+                                <a th:href="@{/events/event/{id}(id=${event.id})}" 
+                                   class="btn btn-primary" tabindex="0">Szczegóły</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="/events" class="btn btn-primary btn-lg" tabindex="0">Zobacz wszystkie wydarzenia</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Stopka -->
+    <footer class="py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h2 class="h5">dzieje.się</h2>
+                    <p>Najlepsze wydarzenia w jednym miejscu</p>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Kontakt</h2>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope me-2" aria-hidden="true"></i> kontakt@dziejesie.pl</li>
+                        <li><i class="bi bi-telephone me-2" aria-hidden="true"></i> +48 123 456 789</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Informacje</h2>
+                    <ul class="list-unstyled">
+                        <li><a href="/privacy" class="text-white" tabindex="0">Polityka prywatności</a></li>
+                        <li><a href="/terms" class="text-white" tabindex="0">Regulamin</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const zoomToggleNav = document.getElementById('zoomToggleNav');
+            const themeToggleNav = document.getElementById('themeToggleNav');
+            const searchInput = document.getElementById('searchInput');
+            const citySelect = document.getElementById('citySelect');
+            const eventCards = document.querySelectorAll('.card');
+            const featuredEventsTitle = document.getElementById('featured-events-title');
+            const cityNameElement = document.getElementById('city-name');
+            const cityNameSpan = cityNameElement.querySelector('span');
+
+            const normalizeText = (text) => {
+                return text ? text.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+            };
+
+            const updateTheme = () => {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon();
+            };
+
+            const updateThemeIcon = () => {
+                const icon = themeToggleNav.querySelector('i');
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                if (currentTheme === 'dark') {
+                    icon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                    themeToggleNav.setAttribute('aria-label', 'Włącz jasny motyw');
+                } else {
+                    icon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                    themeToggleNav.setAttribute('aria-label', 'Włącz ciemny motyw');
+                }
+            };
+
+            zoomToggleNav.addEventListener('click', function() {
+                document.body.classList.toggle('zoomed');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('zoomed')) {
+                    icon.classList.replace('bi-zoom-in', 'bi-zoom-out');
+                    localStorage.setItem('zoomed', 'true');
+                } else {
+                    icon.classList.replace('bi-zoom-out', 'bi-zoom-in');
+                    localStorage.removeItem('zoomed');
+                }
+            });
+
+            const filterEvents = () => {
+                const searchTerm = searchInput.value.trim();
+                const city = citySelect.value;
+
+                if (searchTerm || city) {
+                    let queryParams = [];
+                    if (searchTerm) queryParams.push(`search=${encodeURIComponent(searchTerm)}`);
+                    if (city) queryParams.push(`city=${encodeURIComponent(city)}`);
+                    
+                    window.location.href = `/search?${queryParams.join('&')}`;
+                }
+            };
+
+            const initDropdowns = () => {
+                const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+                
+                const focusFirstItem = (menu) => {
+                    const firstItem = menu.querySelector('.dropdown-item:not(:disabled)');
+                    if (firstItem) {
+                        firstItem.focus();
+                        firstItem.classList.add('dropdown-item-focused');
+                    }
+                };
+
+                const toggleDropdown = (element, open = null) => {
+                    const dropdown = bootstrap.Dropdown.getInstance(element) || new bootstrap.Dropdown(element);
+                    const isOpen = element.nextElementSibling.classList.contains('show');
+                    
+                    if (open === true || (open === null && !isOpen)) {
+                        dropdown.show();
+                        setTimeout(() => focusFirstItem(element.nextElementSibling), 50);
+                    } else {
+                        dropdown.hide();
+                    }
+                };
+
+                dropdownToggles.forEach(toggle => {
+                    toggle.setAttribute('aria-haspopup', 'true');
+                    toggle.setAttribute('aria-expanded', 'false');
+
+                    toggle.addEventListener('keydown', function(e) {
+                        const dropdownMenu = this.nextElementSibling;
+                        const isMenuOpen = dropdownMenu.classList.contains('show');
+
+                        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                            e.preventDefault();
+                            toggleDropdown(this);
+                            return;
+                        }
+                        
+                        if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            if (!isMenuOpen) {
+                                toggleDropdown(this, true);
+                            } else {
+                                const firstItem = dropdownMenu.querySelector('.dropdown-item:not(:disabled)');
+                                if (firstItem) firstItem.focus();
+                            }
+                            return;
+                        }
+
+                        if (e.key === 'ArrowUp' && !isMenuOpen) {
+                            e.preventDefault();
+                            toggleDropdown(this, true);
+                            setTimeout(() => {
+                                const items = dropdownMenu.querySelectorAll('.dropdown-item:not(:disabled)');
+                                if (items.length > 0) items[items.length - 1].focus();
+                            }, 50);
+                            return;
+                        }
+                    });
+
+                    toggle.addEventListener('show.bs.dropdown', () => {
+                        toggle.setAttribute('aria-expanded', 'true');
+                    });
+
+                    toggle.addEventListener('hide.bs.dropdown', () => {
+                        toggle.setAttribute('aria-expanded', 'false');
+                        const items = toggle.nextElementSibling.querySelectorAll('.dropdown-item');
+                        items.forEach(item => item.classList.remove('dropdown-item-focused'));
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    const openMenu = document.querySelector('.dropdown-menu.show');
+                    if (!openMenu) return;
+
+                    const items = Array.from(openMenu.querySelectorAll('.dropdown-item:not(:disabled)'));
+                    if (items.length === 0) return;
+
+                    const currentItem = document.activeElement;
+                    const currentIndex = items.indexOf(currentItem);
+
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const nextIndex = (currentIndex + 1) % items.length;
+                        items[nextIndex].focus();
+                        items.forEach(item => item.classList.remove('dropdown-item-focused'));
+                        items[nextIndex].classList.add('dropdown-item-focused');
+                        return;
+                    }
+
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const prevIndex = (currentIndex - 1 + items.length) % items.length;
+                        items[prevIndex].focus();
+                        items.forEach(item => item.classList.remove('dropdown-item-focused'));
+                        items[prevIndex].classList.add('dropdown-item-focused');
+                        return;
+                    }
+
+                    if ((e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') && 
+                        currentItem.classList.contains('dropdown-item')) {
+                        e.preventDefault();
+                        currentItem.click();
+                        const dropdownToggle = openMenu.previousElementSibling;
+                        const dropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+                        if (dropdown) dropdown.hide();
+                        return;
+                    }
+
+                    if (e.key === 'Escape') {
+                        const dropdownToggle = openMenu.previousElementSibling;
+                        const dropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+                        if (dropdown) {
+                            dropdown.hide();
+                            dropdownToggle.focus();
+                        }
+                        return;
+                    }
+
+                    if (e.key === 'Home') {
+                        e.preventDefault();
+                        items[0].focus();
+                        items.forEach(item => item.classList.remove('dropdown-item-focused'));
+                        items[0].classList.add('dropdown-item-focused');
+                        return;
+                    }
+
+                    if (e.key === 'End') {
+                        e.preventDefault();
+                        items[items.length - 1].focus();
+                        items.forEach(item => item.classList.remove('dropdown-item-focused'));
+                        items[items.length - 1].classList.add('dropdown-item-focused');
+                        return;
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.dropdown')) {
+                        const openMenus = document.querySelectorAll('.dropdown-menu.show');
+                        openMenus.forEach(menu => {
+                            const dropdown = bootstrap.Dropdown.getInstance(menu.previousElementSibling);
+                            if (dropdown) dropdown.hide();
+                        });
+                    }
+                });
+            };
+
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            }
+            updateThemeIcon();
+
+            if (localStorage.getItem('zoomed') === 'true') {
+                document.body.classList.add('zoomed');
+                zoomToggleNav.querySelector('i').classList.replace('bi-zoom-in', 'bi-zoom-out');
+            }
+
+            themeToggleNav.addEventListener('click', updateTheme);
+            const searchButton = document.querySelector('.input-group button');
+            searchButton.addEventListener('click', filterEvents);
+            citySelect.addEventListener('change', filterEvents);
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    filterEvents();
+                }
+            });
+
+            initDropdowns();
+
+            filterEvents();
+        });
+    </script>
+</body>
+</html>

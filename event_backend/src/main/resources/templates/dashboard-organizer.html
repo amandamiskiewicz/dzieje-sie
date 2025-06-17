@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Panel organizatora - Zarządzaj swoimi wydarzeniami">
+    <title>Panel organizatora - dzieje.się</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-hover: #1b5e20;
+            --primary-light: #81c784;
+            --primary-contrast: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --background: #f8f9fa;
+            --surface: #ffffff;
+            --error: #dc3545;
+            --success: #28a745;
+            --warning: #ffc107;
+            --info: #0066cc;
+            --text-info: #ffffff;
+            --font-size-base: 1rem;
+            --navbar-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            --focus-outline: 3px solid var(--primary-light);
+            --focus-shadow: 0 0 0 3px rgba(129, 199, 132, 0.5);
+        }
+        
+        [data-bs-theme="dark"] {
+            --primary-color: #0f0f0f;
+            --primary-hover: rgb(23, 37, 23);
+            --primary-light: #929e93;
+            --primary-contrast: #d6d6d6;
+            --text-primary: #f2faf2;
+            --text-secondary: #dff0e3;
+            --background: #2f302f;
+            --surface: #1e1e1e;
+            --error: #ff6b6b;
+            --success: #51cf66;
+            --info: #0066cc;
+            --text-info: #ffffff;
+            --navbar-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --focus-outline: 3px solid var(--primary-light);
+            --focus-shadow: 0 0 0 3px rgba(146, 158, 147, 0.7);
+        }
+    
+        [data-bs-theme="dark"] .bi {
+            color: var(--primary-contrast) !important;
+        }
+        
+        body {
+            font-size: var(--font-size-base);
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 0.8rem 0;
+            box-shadow: var(--navbar-shadow);
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats-card {
+            background-color: var(--surface);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .event-card {
+            background-color: var(--surface);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+            height: 100%;
+            border-top: 3px solid var(--primary-color);
+            position: relative;
+            padding-right: 4rem;
+            padding-top: 1.5rem;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.2);
+        }
+        
+        .event-status-badge {
+            position: absolute;
+            top: 5rem; 
+            right: 1.5rem; 
+            z-index: 1;
+            white-space: nowrap; 
+        }
+        
+        .btn-manage {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-manage:hover {
+            background-color: var(--primary-hover);
+            color: white;
+        }
+    
+        .btn-info {
+            background-color: var(--primary-color);
+            color: var(--primary-contrast);
+            border-color: var(--primary-color);
+        }
+    
+        .btn-info:hover {
+            background-color: var(--primary-hover);
+            color: var(--primary-contrast);
+            border-color: var(--primary-hover);
+        }
+    
+        .btn-info:focus {
+            background-color: var(--primary-hover);
+            color: var(--primary-contrast);
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.5);
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+            outline: var(--focus-outline);
+            box-shadow: var(--focus-shadow);
+        }
+        
+        a:focus,
+        button:focus,
+        input:focus,
+        select:focus,
+        textarea:focus,
+        [tabindex]:focus,
+        [role="button"]:focus,
+        [role="link"]:focus,
+        [role="menuitem"]:focus,
+        .dropdown-item:focus,
+        .page-link:focus,
+        .form-control:focus,
+        .form-select:focus,
+        .btn:focus,
+        .btn-check:focus + .btn,
+        .event-card:focus-within {
+            outline: var(--focus-outline) !important;
+            outline-offset: 3px !important;
+            box-shadow: var(--focus-shadow) !important;
+            transition: outline 0.2s ease, box-shadow 0.2s ease;
+        }
+    
+        .btn:focus {
+            outline-offset: 2px !important;
+        }
+    
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25) !important;
+        }
+    
+        .dropdown-item:focus {
+            background-color: var(--primary-light) !important;
+            color: var(--primary-contrast) !important;
+        }
+    
+        .page-link:focus {
+            z-index: 3;
+            color: var(--primary-hover) !important;
+            background-color: var(--primary-light) !important;
+            border-color: var(--primary-light) !important;
+        }
+    
+        .accessibility-btn-nav:focus {
+            outline: 3px solid var(--primary-contrast) !important;
+            outline-offset: 2px !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+    
+        .empty-state {
+            border: 2px dashed var(--text-secondary);
+            border-radius: 8px;
+            padding: 3rem 1rem;
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+    
+        .accessibility-nav {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        
+        .accessibility-btn-nav {
+            background-color: transparent;
+            border: 1px solid var(--primary-light);
+            color: var(--primary-contrast);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .accessibility-btn-nav:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.zoomed {
+            --font-size-base: 1.5rem;
+            font-size: var(--font-size-base);
+        }
+        
+        body.zoomed .btn, 
+        body.zoomed .form-control, 
+        body.zoomed .card, 
+        body.zoomed .navbar-brand {
+            font-size: var(--font-size-base);
+        }
+    
+        footer {
+            background-color: var(--primary-color) !important;
+            color: var(--primary-contrast) !important;
+        }
+    
+        .navbar-dark .navbar-nav .nav-link {
+            color: var(--primary-contrast) !important;
+            padding: 0.5rem 1rem;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link:hover {
+            text-decoration: underline;
+            color: var(--primary-light) !important;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+    
+        @media (max-width: 992px) {
+            .navbar-collapse {
+                padding-top: 1rem;
+            }
+            
+            .accessibility-nav {
+                margin-left: 0;
+                margin-top: 1rem;
+                justify-content: flex-start;
+            }
+        }
+    
+        .modal-content:focus {
+            outline: none !important;
+        }
+    
+        .btn-close:focus {
+            box-shadow: 0 0 0 3px rgba(129, 199, 132, 0.5) !important;
+            opacity: 1;
+        }
+    
+        .table-hover tbody tr:focus {
+            background-color: rgba(129, 199, 132, 0.2);
+            outline: var(--focus-outline);
+            outline-offset: -2px;
+        }
+    
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+            color: var(--primary-contrast) !important;
+        }
+    
+        .bg-info {
+            background-color: var(--info) !important;
+            color: var(--text-info) !important;
+        }
+    
+        .bg-secondary {
+            background-color: var(--text-secondary) !important;
+            color: var(--surface) !important;
+        }
+        .event-full {
+            color: var(--error);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Przejdź do głównej zawartości</a>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" aria-label="Główne menu">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-calendar-event me-2" aria-hidden="true"></i>dzieje.się
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-expanded="false" aria-label="Rozwiń menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu użytkownika">
+                            <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
+                            <span th:text="${#authentication.name}"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="/profile/edit">
+                                    <i class="bi bi-pencil-square me-2" aria-hidden="true"></i>Edytuj profil
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="d-inline">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
+                                        <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Wyloguj się
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="accessibility-nav">
+                    <button class="accessibility-btn-nav" id="zoomToggleNav" aria-label="Powiększ tekst (50%)">
+                        <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                    </button>
+                    <button class="accessibility-btn-nav" id="themeToggleNav" aria-label="Zmień motyw">
+                        <i class="bi bi-sun-fill" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Główna zawartość -->
+    <main id="main-content" class="dashboard-container">
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>
+            <span th:text="${param.success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
+        </div>
+
+        <div class="welcome-section mb-5">
+            <h1 class="mb-3">
+                <i class="bi bi-person-gear me-2" aria-hidden="true"></i>
+                Witaj, <span th:text="${user?.email ?: #authentication.name}"></span>!
+            </h1>
+            <p class="lead">Tutaj możesz zarządzać swoimi wydarzeniami i uczestnikami</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-calendar2-check" style="font-size: 2rem; color: var(--primary-color);" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0" th:text="${stats?.totalEvents ?: 0}">0</h3>
+                            <p class="mb-0">Wszystkie wydarzenia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-calendar-check" style="font-size: 2rem; color: var(--primary-color);" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0" th:text="${stats?.activeEvents ?: 0}">0</h3>
+                            <p class="mb-0">Aktywne wydarzenia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-calendar3" style="font-size: 2rem; color: var(--primary-color);" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0" th:text="${stats?.upcomingEvents ?: 0}">0</h3>
+                            <p class="mb-0">Nadchodzące</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-people" style="font-size: 2rem; color: var(--primary-color);" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0" th:text="${stats?.totalParticipants ?: 0}">0</h3>
+                            <p class="mb-0">Uczestników łącznie</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <section aria-labelledby="your-events-heading" class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 id="your-events-heading">
+                    <i class="bi bi-calendar2-event me-2" aria-hidden="true"></i>
+                    Twoje wydarzenia
+                </h2>
+                <a th:if="${events != null and !events.empty}" href="/events/create_event" class="btn btn-manage" aria-label="Dodaj nowe wydarzenie">
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Dodaj wydarzenie
+                </a>
+            </div>
+            
+            <div th:if="${events != null and !events.empty}">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="col" th:each="event : ${events}">
+                        <div class="event-card p-3 d-flex flex-column h-100" tabindex="0">
+                            <span class="badge event-status-badge"
+                                th:classappend="${event.status == 'ACTIVE'} ? 'bg-success' : 
+                                                (${event.status == 'UPCOMING'} ? 'bg-info' : 'bg-secondary')"
+                                th:text="${event.status == 'ACTIVE'} ? 'Aktywne' : 
+                                        (${event.status == 'UPCOMING'} ? 'Nadchodzące' : 'Zakończone')">
+                                Status
+                            </span>
+                            <h3 class="fw-bold mb-3" th:text="${event.title}">Tytuł wydarzenia</h3>
+                            <div class="mb-3">
+                                <div class="mb-1">
+                                    <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>
+                                    <span th:text="${#temporals.format(event.startDate, 'dd.MM.yyyy HH:mm')}">Data</span>
+                                </div>
+                                <div class="mb-1">
+                                    <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>
+                                    <span th:text="${event.city}">Miasto</span>
+                                </div>
+                                <div class="mb-1">
+                                    <i class="bi bi-people me-1" aria-hidden="true"></i>
+                                    <span th:text="${event.participantsCount} + ' / ' + ${event.maxParticipants} + ' uczestników' ">0 / 0 uczestników</span>
+                                </div>
+                            </div>
+                            <p class="flex-grow-1" th:text="${#strings.abbreviate(event.description, 120)}">Opis wydarzenia...</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <a th:href="@{/events/event/{id}(id=${event.id})}" class="btn btn-info">
+                                    Szczegóły
+                                </a>
+                                <div>
+                                    <a th:href="@{/events/{eventId}/participants(eventId=${event.id})}" 
+                                        class="btn btn-sm btn-outline-primary me-2"
+                                        aria-label="Zarządzaj uczestnikami">
+                                        <i class="bi bi-people" aria-hidden="true"></i>
+                                    </a>
+                                    <a th:href="@{/events/edit/{id}(id=${event.id})}"
+                                       class="btn btn-sm btn-outline-secondary me-2"
+                                       aria-label="Edytuj wydarzenie">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                                            th:attr="data-event-id=${event.id}, data-event-title=${event.title}"
+                                            aria-label="Usuń wydarzenie">
+                                        <i class="bi bi-trash" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${events == null or events.empty}" class="empty-state text-center py-5">
+                <i class="bi bi-calendar-plus" style="font-size: 3rem; color: var(--primary-color);" aria-hidden="true"></i>
+                <h3 class="h4 mt-3">Nie masz jeszcze żadnych wydarzeń</h3>
+                <p class="text-muted">Stwórz swoje pierwsze wydarzenie i zacznij przyjmować uczestników!</p>
+                <a href="/events/create_event" class="btn btn-manage mt-3">
+                    <i class="bi bi-plus-lg me-2" aria-hidden="true"></i> Dodaj pierwsze wydarzenie
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="confirmDeleteModalLabel">Potwierdź usunięcie</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Czy na pewno chcesz usunąć wydarzenie <strong id="eventTitleInModal"></strong>?</p>
+                    <p class="text-danger">Ta operacja jest nieodwracalna i usunie również wszystkie powiązane zapisy uczestników.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <form id="deleteForm" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-danger">
+                            <span class="submit-text">Usuń</span>
+                            <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stopka -->
+    <footer class="py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h2 class="h5">dzieje.się</h2>
+                    <p class="small">Najlepsze wydarzenia w jednym miejscu</p>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Kontakt</h2>
+                    <ul class="list-unstyled small">
+                        <li><i class="bi bi-envelope me-2" aria-hidden="true"></i> kontakt@dziejesie.pl</li>
+                        <li><i class="bi bi-telephone me-2" aria-hidden="true"></i> +48 123 456 789</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Informacje</h2>
+                    <ul class="list-unstyled small">
+                        <li><a href="/privacy" class="text-white" tabindex="0">Polityka prywatności</a></li>
+                        <li><a href="/terms" class="text-white" tabindex="0">Regulamin</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        function updateTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-bs-theme', savedTheme);
+                return;
+            }
+            
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+        }
+            
+            const zoomToggleNav = document.getElementById('zoomToggleNav');
+            const themeToggleNav = document.getElementById('themeToggleNav');
+
+            zoomToggleNav.addEventListener('click', function() {
+                document.body.classList.toggle('zoomed');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('zoomed')) {
+                    icon.classList.remove('bi-zoom-in');
+                    icon.classList.add('bi-zoom-out');
+                    this.setAttribute('aria-label', 'Przywróć normalny rozmiar tekstu');
+                } else {
+                    icon.classList.remove('bi-zoom-out');
+                    icon.classList.add('bi-zoom-in');
+                    this.setAttribute('aria-label', 'Powiększ tekst (50%)');
+                }
+            });
+
+            themeToggleNav.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                localStorage.setItem('theme', newTheme);
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                
+                const icon = this.querySelector('i');
+                if (newTheme === 'dark') {
+                    icon.classList.remove('bi-moon-fill');
+                    icon.classList.add('bi-sun-fill');
+                    this.setAttribute('aria-label', 'Włącz jasny motyw');
+                } else {
+                    icon.classList.remove('bi-sun-fill');
+                    icon.classList.add('bi-moon-fill');
+                    this.setAttribute('aria-label', 'Włącz ciemny motyw');
+                }
+            });
+
+            updateTheme();
+
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            const themeIcon = themeToggleNav.querySelector('i');
+            if (currentTheme === 'dark') {
+                themeIcon.classList.remove('bi-moon-fill');
+                themeIcon.classList.add('bi-sun-fill');
+                themeToggleNav.setAttribute('aria-label', 'Włącz jasny motyw');
+            } else {
+                themeIcon.classList.remove('bi-sun-fill');
+                themeIcon.classList.add('bi-moon-fill');
+                themeToggleNav.setAttribute('aria-label', 'Włącz ciemny motyw');
+            }
+
+            const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (confirmDeleteModal) {
+                confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const eventId = button.getAttribute('data-event-id');
+                    const eventTitle = button.getAttribute('data-event-title');
+                    
+                    document.getElementById('eventTitleInModal').textContent = eventTitle;
+                    document.getElementById('deleteForm').action = '/events/' + eventId + '/delete';
+                });
+            }
+            
+            const deleteForm = document.getElementById('deleteForm');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const submitText = submitBtn.querySelector('.submit-text');
+                    const spinner = submitBtn.querySelector('.spinner-border');
+                    
+                    submitBtn.disabled = true;
+                    submitText.textContent = 'Usuwanie...';
+                    spinner.classList.remove('d-none');
+                });
+            }
+
+            document.querySelectorAll('.event-card, .table-hover tbody tr').forEach(element => {
+                element.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const link = this.querySelector('a');
+                        if (link) {
+                            link.click();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

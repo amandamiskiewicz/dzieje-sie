@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Zarejestruj się jako uczestnik lub organizator w dzieje.się">
+    <title>Wybierz rolę - dzieje.się</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-hover: #1b5e20;
+            --primary-light: #81c784;
+            --primary-contrast: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --background: #f8f9fa;
+            --surface: #ffffff;
+            --error: #dc3545;
+            --success: #28a745;
+            --info: #0066cc;
+            --font-size-base: 1rem;
+            --navbar-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            --link:#2e7d32;
+        }
+    
+        [data-bs-theme="dark"] {
+            --primary-color: #0f0f0f;
+            --primary-hover: rgb(23, 37, 23);
+            --primary-light: #929e93;
+            --primary-contrast: #d6d6d6;
+            --text-primary: #f2faf2;
+            --text-secondary: #dff0e3;
+            --background: #2f302f;
+            --surface: #1e1e1e;
+            --error: #ff6b6b;
+            --success: #51cf66;
+            --info: #3c7c34;
+            --navbar-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --link:#f2faf2;
+        }
+        
+        body {
+            font-size: var(--font-size-base);
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 0.8rem 0;
+            box-shadow: var(--navbar-shadow);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--primary-contrast);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .btn-primary:hover, 
+        .btn-primary:focus {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: var(--primary-contrast);
+        }
+    
+        .btn-primary:active {
+            background-color: var(--primary-hover) !important;
+            border-color: var(--primary-hover) !important;
+            color: var(--primary-contrast) !important;
+            transform: translateY(1px);
+        }
+    
+        .btn-primary:focus {
+            box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.5) !important;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-primary:hover, 
+        .btn-outline-primary:focus {
+            background-color: transparent;
+            color: var(--primary-color);
+            border-color: var(--primary-hover);
+            box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.25);
+        }
+    
+        .btn-outline-primary:active {
+            background-color: rgba(46, 125, 50, 0.1) !important;
+            color: var(--primary-hover) !important;
+            border-color: var(--primary-hover) !important;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+            outline: 3px solid var(--primary-contrast) !important;
+        }
+        
+        .registration-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--surface);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .btn-role {
+            height: 60px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-participant, 
+        .btn-organizer {
+            background-color: var(--primary-color);
+            color: var(--primary-contrast);
+            border: none;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .btn-participant:hover, 
+        .btn-participant:focus,
+        .btn-organizer:hover,
+        .btn-organizer:focus {
+            background-color: var(--primary-hover);
+            color: var(--primary-contrast);
+        }
+    
+        .btn-participant:active,
+        .btn-organizer:active {
+            background-color: var(--primary-hover) !important;
+            transform: translateY(1px);
+        }
+        
+        .divider {
+            border-top: 1px solid var(--text-secondary);
+            opacity: 0.2;
+            margin: 1.5rem 0;
+        }
+        
+        .accessibility-nav {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        
+        .accessibility-btn-nav {
+            background-color: transparent;
+            border: 1px solid var(--primary-light);
+            color: var(--primary-contrast);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .accessibility-btn-nav:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.zoomed {
+            --font-size-base: 1.5rem;
+            font-size: var(--font-size-base);
+        }
+        
+        body.zoomed .btn, 
+        body.zoomed .form-control, 
+        body.zoomed .card, 
+        body.zoomed .navbar-brand {
+            font-size: var(--font-size-base);
+        }
+        
+        footer {
+            background-color: var(--primary-color) !important;
+            color: var(--primary-contrast) !important;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        
+        footer a, 
+        footer h2, 
+        footer p, 
+        footer li {
+            color: var(--primary-contrast) !important;
+        }
+    
+        .login-link {
+            color: var(--link) !important;
+            font-weight: 500;
+        }
+        
+        .login-link:hover {
+            color: #a8c1a3 !important;
+            text-decoration: underline;
+        }
+    
+        .navbar-dark .navbar-nav .nav-link {
+            color: var(--primary-contrast) !important;
+            padding: 0.5rem 1rem;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link:hover {
+            text-decoration: underline;
+            color: var(--primary-contrast) !important;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+    
+        .navbar-dark .navbar-nav .nav-link:focus {
+            outline: 3px solid var(--primary-contrast) !important;
+            outline-offset: -3px !important;
+            text-decoration: none !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: var(--primary-contrast) !important;
+        }
+    
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px var(--primary-contrast) !important;
+        }
+    
+        a:focus, 
+        button:focus, 
+        input:focus, 
+        select:focus,
+        textarea:focus,
+        [tabindex]:focus,
+        [role="button"]:focus,
+        [role="link"]:focus,
+        .btn-role:focus,
+        .accessibility-btn-nav:focus,
+        .navbar-toggler:focus {
+            outline: 3px solid var(--primary-light) !important;
+            outline-offset: 3px !important;
+            box-shadow: 0 0 0 3px rgba(129, 199, 132, 0.5) !important;
+            transition: outline 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none !important;
+        }
+    
+        .btn-role:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px var(--primary-light), 
+                        0 4px 8px rgba(0, 0, 0, 0.15) !important;
+        }
+    
+        .accessibility-btn-nav:focus {
+            outline: 3px solid var(--primary-contrast) !important;
+            outline-offset: 2px !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(1.1);
+        }
+    
+        .login-link:focus {
+            outline: 3px solid var(--primary-light) !important;
+            outline-offset: 3px !important;
+            text-decoration: none !important;
+            border-radius: 4px;
+            padding: 0 2px;
+        }
+    
+        [data-bs-theme="dark"] {
+            --focus-color: rgba(129, 199, 132, 0.7);
+        }
+    
+        [data-bs-theme="dark"] a:focus, 
+        [data-bs-theme="dark"] button:focus, 
+        [data-bs-theme="dark"] input:focus, 
+        [data-bs-theme="dark"] select:focus {
+            outline-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 3px var(--focus-color) !important;
+        }
+    
+        [data-bs-theme="dark"] .accessibility-btn-nav:focus {
+            outline-color: var(--primary-contrast) !important;
+        }
+    
+        footer a:focus {
+            outline-color: var(--primary-contrast) !important;
+            text-decoration: underline !important;
+        }
+    
+        @media (max-width: 768px) {
+            .registration-container {
+                padding: 1.5rem;
+                margin: 1rem auto;
+            }
+            
+            .btn-role {
+                height: 50px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .registration-container {
+                padding: 1rem;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Przejdź do głównej zawartości</a>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" aria-label="Główne menu">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-calendar-event me-2" aria-hidden="true"></i>dzieje.się
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-expanded="false" aria-label="Rozwiń menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="accessibility-nav ms-auto">
+                    <button class="accessibility-btn-nav" id="zoomToggleNav" aria-label="Powiększ tekst (50%)">
+                        <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                    </button>
+                    <button class="accessibility-btn-nav" id="themeToggleNav" aria-label="Zmień motyw">
+                        <i class="bi bi-moon-fill" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Główna zawartość -->
+    <main id="main-content" class="container py-4">
+        <div class="registration-container">
+            <header class="text-center mb-4">
+                <h1 class="h2">Wybierz rolę rejestracji</h1>
+                <p class="text-muted">Zarejestruj się jako uczestnik lub organizator wydarzeń</p>
+            </header>
+            
+            <div class="divider" role="separator" aria-label="Separator"></div>
+            
+            <div class="d-grid gap-3">
+                <a href="/register-participant" class="btn btn-role btn-participant" role="button">
+                    <i class="bi bi-person-fill me-2" aria-hidden="true"></i>
+                    Zarejestruj się jako uczestnik
+                </a>
+                
+                <a href="/register-organizer" class="btn btn-role btn-organizer" role="button">
+                    <i class="bi bi-people-fill me-2" aria-hidden="true"></i>
+                    Zarejestruj się jako organizator
+                </a>
+            </div>
+            
+            <div class="divider" role="separator" aria-label="Separator"></div>
+            
+            <div class="text-center mt-3">
+                <p>Masz już konto? <a href="/login" class="login-link">Zaloguj się</a></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Stopka -->
+    <footer class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h2 class="h5">dzieje.się</h2>
+                    <p>Najlepsze wydarzenia w jednym miejscu</p>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Kontakt</h2>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope me-2" aria-hidden="true"></i> kontakt@dziejesie.pl</li>
+                        <li><i class="bi bi-telephone me-2" aria-hidden="true"></i> +48 123 456 789</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Informacje</h2>
+                    <ul class="list-unstyled">
+                        <li><a href="/privacy">Polityka prywatności</a></li>
+                        <li><a href="/terms">Regulamin</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+                    return;
+                }
+                
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+            }
+
+            const zoomToggleNav = document.getElementById('zoomToggleNav');
+            const themeToggleNav = document.getElementById('themeToggleNav');
+
+            zoomToggleNav.addEventListener('click', function() {
+                document.body.classList.toggle('zoomed');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('zoomed')) {
+                    icon.classList.remove('bi-zoom-in');
+                    icon.classList.add('bi-zoom-out');
+                    this.setAttribute('aria-label', 'Przywróć normalny rozmiar tekstu');
+                } else {
+                    icon.classList.remove('bi-zoom-out');
+                    icon.classList.add('bi-zoom-in');
+                    this.setAttribute('aria-label', 'Powiększ tekst (50%)');
+                }
+            });
+
+            themeToggleNav.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                localStorage.setItem('theme', newTheme);
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                
+                const icon = this.querySelector('i');
+                if (newTheme === 'dark') {
+                    icon.classList.remove('bi-moon-fill');
+                    icon.classList.add('bi-sun-fill');
+                    this.setAttribute('aria-label', 'Włącz jasny motyw');
+                } else {
+                    icon.classList.remove('bi-sun-fill');
+                    icon.classList.add('bi-moon-fill');
+                    this.setAttribute('aria-label', 'Włącz ciemny motyw');
+                }
+            });
+
+            updateTheme();
+
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            const themeIcon = themeToggleNav.querySelector('i');
+            if (currentTheme === 'dark') {
+                themeIcon.classList.remove('bi-moon-fill');
+                themeIcon.classList.add('bi-sun-fill');
+                themeToggleNav.setAttribute('aria-label', 'Włącz jasny motyw');
+            } else {
+                themeIcon.classList.remove('bi-sun-fill');
+                themeIcon.classList.add('bi-moon-fill');
+                themeToggleNav.setAttribute('aria-label', 'Włącz ciemny motyw');
+            }
+
+            document.querySelectorAll('.btn-role').forEach(link => {
+                link.setAttribute('role', 'button');
+            });
+        });
+    </script>
+</body>
+</html>

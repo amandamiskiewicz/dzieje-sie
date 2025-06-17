@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edycja profilu - dzieje.się</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-hover: #1b5e20;
+            --primary-light: #81c784;
+            --primary-contrast: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --background: #f8f9fa;
+            --surface: #ffffff;
+            --error: #dc3545;
+            --success: #28a745;
+            --info: #0066cc;
+            --font-size-base: 1rem;
+            --navbar-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            --bs-danger: #dc3545;
+            --focus-outline: 3px solid #81c784;
+            --focus-shadow: 0 0 0 3px rgba(129, 199, 132, 0.5);
+        }
+
+        [data-bs-theme="dark"] {
+            --primary-color: #0f0f0f;
+            --primary-hover: rgb(23, 37, 23);
+            --primary-light: #929e93;
+            --primary-contrast: #d6d6d6;
+            --text-primary: #f2faf2;
+            --text-secondary: #dff0e3;
+            --background: #2f302f;
+            --surface: #1e1e1e;
+            --error: #ff6b6b;
+            --success: #51cf66;
+            --info: #3c7c34;
+            --navbar-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --bs-danger: #ff6b6b;
+            --focus-outline: 3px solid #929e93;
+            --focus-shadow: 0 0 0 3px rgba(146, 158, 147, 0.5);
+        }
+
+        body {
+            font-size: var(--font-size-base);
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 0.8rem 0;
+            box-shadow: var(--navbar-shadow);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--primary-contrast);
+        }
+        
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .form-section {
+            background-color: var(--surface);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        footer {
+            background-color: var(--primary-color) !important;
+            color: var(--primary-contrast) !important;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+            outline: var(--focus-outline);
+            box-shadow: var(--focus-shadow);
+        }
+
+        .accessibility-nav {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        
+        .accessibility-btn-nav {
+            background-color: transparent;
+            border: 1px solid var(--primary-light);
+            color: var(--primary-contrast);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .accessibility-btn-nav:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.zoomed {
+            --font-size-base: 1.5rem;
+            font-size: var(--font-size-base);
+        }
+        
+        body.zoomed .btn, 
+        body.zoomed .form-control, 
+        body.zoomed .card, 
+        body.zoomed .navbar-brand {
+            font-size: var(--font-size-base);
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 0.8rem 0;
+            box-shadow: var(--navbar-shadow);
+        }
+
+        .navbar .nav-link span,
+        .navbar .nav-link i[aria-hidden="true"] {
+            color: var(--primary-contrast);
+        }
+
+        .text-danger {
+            color: var(--bs-danger) !important;
+        }
+
+        a:focus, 
+        button:focus, 
+        input:focus, 
+        select:focus,
+        textarea:focus,
+        [tabindex]:focus,
+        [role="button"]:focus,
+        [role="link"]:focus,
+        [role="menuitem"]:focus,
+        [role="radio"]:focus,
+        [role="checkbox"]:focus {
+            outline: var(--focus-outline) !important;
+            outline-offset: 3px !important;
+            box-shadow: var(--focus-shadow) !important;
+            transition: outline 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:focus {
+            outline: var(--focus-outline) !important;
+            outline-offset: 2px !important;
+            box-shadow: var(--focus-shadow) !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25) !important;
+        }
+
+        .form-section:focus-within {
+            box-shadow: 0 0 0 3px var(--primary-light) !important;
+        }
+
+        .dropdown-item:focus {
+            background-color: var(--primary-light) !important;
+            color: var(--primary-contrast) !important;
+        }
+
+        .page-link:focus {
+            z-index: 3;
+            color: var(--primary-hover) !important;
+            background-color: var(--primary-light) !important;
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25) !important;
+        }
+
+        .modal-content:focus {
+            outline: var(--focus-outline) !important;
+        }
+
+        .btn-close:focus {
+            box-shadow: var(--focus-shadow) !important;
+        }
+
+        .accessibility-btn-nav:focus {
+            outline: var(--focus-outline) !important;
+            outline-offset: 2px !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        .btn-check:focus + .btn, .btn:focus {
+            box-shadow: var(--focus-shadow) !important;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25) !important;
+        }
+
+        .card:focus-within {
+            box-shadow: var(--focus-shadow) !important;
+        }
+
+        footer a:focus {
+            outline: var(--focus-outline) !important;
+            outline-offset: 2px !important;
+            text-decoration: none !important;
+        }
+
+        .btn-primary:active, 
+        .btn-primary:focus:active, 
+        .btn-outline-primary:active, 
+        .btn-outline-primary:focus:active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: var(--primary-contrast) !important;
+            box-shadow: none !important;
+        }
+
+        .btn-primary:focus, 
+        .btn-outline-primary:focus {
+            box-shadow: none !important;
+        }
+
+        .accessibility-btn-nav:active, 
+        .accessibility-btn-nav:focus:active {
+            background-color: transparent !important;
+            color: var(--primary-contrast) !important;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Przejdź do głównej zawartości</a>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" aria-label="Główne menu">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-calendar-event me-2" aria-hidden="true"></i>dzieje.się
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-expanded="false" aria-label="Rozwiń menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu użytkownika">
+                            <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
+                            <span th:text="${#authentication.name}"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li sec:authorize="hasAnyRole('ORGANIZER')">
+                                <a class="dropdown-item" href="/dashboard/organizer">
+                                    <i class="bi bi-speedometer2 me-2"></i>Panel organizatora
+                                </a>
+                            </li>
+                            <li role="none" sec:authorize="hasRole('ADMIN')">
+                                <a class="dropdown-item" href="/admin/dashboard" role="menuitem" tabindex="-1">
+                                    <i class="bi bi-speedometer2 me-2" aria-hidden="true"></i>Panel administratora
+                                </a>
+                            </li>
+                            <li sec:authorize="hasRole('PARTICIPANT')">
+                                <a class="dropdown-item" href="/dashboard/participant">
+                                    <i class="bi bi-ticket-perforated me-2"></i>Moje wydarzenia
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="d-inline">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Wyloguj się
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="accessibility-nav">
+                    <button class="accessibility-btn-nav" id="zoomToggleNav" aria-label="Powiększ tekst (50%)">
+                        <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                    </button>
+                    <button class="accessibility-btn-nav" id="themeToggleNav" aria-label="Zmień motyw">
+                        <i class="bi bi-moon-fill" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Główna zawartość -->
+    <main class="container py-5" id="main-content">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="mb-4">Edytuj profil</h1>
+                
+                <!-- Komunikaty -->
+                <div th:if="${successMessage}" class="alert alert-success" role="alert">
+                    <span th:text="${successMessage}"></span>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                    <span th:text="${errorMessage}"></span>
+                </div>
+                
+                <div class="form-section">
+                    <form id="profileForm" th:action="@{/profile/update}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        
+                        <!-- Wspólne pola dla wszystkich użytkowników -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" 
+                                   th:value="${user.email}" readonly
+                                   aria-describedby="emailHelp">
+                            <div id="emailHelp" class="form-text">Twój adres email nie może być zmieniony</div>
+                        </div>
+                        
+                        <!-- Pola dla uczestnika -->
+                        <div sec:authorize="hasRole('PARTICIPANT')">
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">Imię <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="firstName" 
+                                       th:value="${user.firstName}" name="firstName" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Nazwisko <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="lastName" 
+                                       th:value="${user.lastName}" name="lastName" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Telefon <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="phone" 
+                                       th:value="${user.phone}" name="phone" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Pola dla organizatora -->
+                        <div sec:authorize="hasRole('ORGANIZER')">
+                            <div class="mb-3">
+                                <label for="companyName" class="form-label">Nazwa firmy <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:value="${user.companyName}" id="companyName" 
+                                       name="companyName" required
+                                       aria-describedby="companyNameHelp">
+                                <div id="companyNameHelp" class="form-text">Podaj pełną, oficjalną nazwę Twojej firmy</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nip" class="form-label">NIP <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:value="${user.nip}" id="nip" 
+                                       name="nip" required
+                                       aria-describedby="nipHelp">
+                                <div id="nipHelp" class="form-text">Podaj 10-cyfrowy numer NIP</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="website" class="form-label">Strona internetowa</label>
+                                <input type="url" class="form-control" th:value="${user.website}" id="website" 
+                                       name="website"
+                                       aria-describedby="websiteHelp">
+                                <div id="websiteHelp" class="form-text">Opcjonalnie - podaj adres Twojej strony internetowej</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">Telefon kontaktowy <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" th:value="${user.phone}" id="contact" 
+                                       name="contact" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-primary" onclick="confirmSubmit()">Zapisz zmiany</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Sekcja zmiany hasła -->
+                <div class="form-section">
+                    <h2 class="mb-4">Zmiana hasła</h2>
+                    
+                    <form id="passwordForm" th:action="@{/profile/change-password}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Obecne hasło <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="currentPassword" 
+                                   name="currentPassword" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nowe hasło <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="newPassword" 
+                                   name="newPassword" required
+                                   aria-describedby="newPasswordHelp">
+                            <div id="newPasswordHelp" class="form-text">Minimum 6 znaków</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Potwierdź nowe hasło <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirmPassword" 
+                                   name="confirmPassword" required>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-primary" onclick="confirmPasswordChange()">Zmień hasło</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Stopka -->
+    <footer class="py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h2 class="h5">dzieje.się</h2>
+                    <p class="small">Najlepsze wydarzenia w jednym miejscu</p>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Kontakt</h2>
+                    <ul class="list-unstyled small">
+                        <li><i class="bi bi-envelope me-2" aria-hidden="true"></i> kontakt@dziejesie.pl</li>
+                        <li><i class="bi bi-telephone me-2" aria-hidden="true"></i> +48 123 456 789</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h2 class="h5">Informacje</h2>
+                    <ul class="list-unstyled small">
+                        <li><a href="/privacy" class="text-white" tabindex="0">Polityka prywatności</a></li>
+                        <li><a href="/terms" class="text-white" tabindex="0">Regulamin</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal potwierdzenia -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="confirmModalLabel">Potwierdź zmiany</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                </div>
+                <div class="modal-body">
+                    Czy na pewno chcesz zapisać zmiany?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" id="confirmButton">Potwierdź</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateThemeIcon = () => {
+                const icon = document.getElementById('themeToggleNav').querySelector('i');
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                if (currentTheme === 'dark') {
+                    icon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                } else {
+                    icon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                }
+            };
+
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            }
+            updateThemeIcon();
+
+            if (localStorage.getItem('zoomed') === 'true') {
+                document.body.classList.add('zoomed');
+                document.getElementById('zoomToggleNav').querySelector('i').classList.replace('bi-zoom-in', 'bi-zoom-out');
+            }
+
+            document.getElementById('themeToggleNav').addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon();
+            });
+
+            document.getElementById('zoomToggleNav').addEventListener('click', function() {
+                document.body.classList.toggle('zoomed');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('zoomed')) {
+                    icon.classList.replace('bi-zoom-in', 'bi-zoom-out');
+                    localStorage.setItem('zoomed', 'true');
+                } else {
+                    icon.classList.replace('bi-zoom-out', 'bi-zoom-in');
+                    localStorage.removeItem('zoomed');
+                }
+            });
+
+            const passwordForm = document.getElementById('passwordForm');
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', function(e) {
+                    const newPassword = document.getElementById('newPassword').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    if (newPassword !== confirmPassword) {
+                        e.preventDefault();
+                        alert('Hasła nie są identyczne!');
+                    }
+                });
+            }
+        });
+
+        function confirmSubmit() {
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            const confirmButton = document.getElementById('confirmButton');
+            
+            confirmButton.onclick = function() {
+                document.getElementById('profileForm').submit();
+            };
+            
+            confirmModal.show();
+        }
+
+        function confirmPasswordChange() {
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            const confirmButton = document.getElementById('confirmButton');
+            
+            confirmButton.onclick = function() {
+                document.getElementById('passwordForm').submit();
+            };
+            
+            confirmModal.show();
+        }
+    </script>
+</body>
+</html>
